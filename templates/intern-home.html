@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/admin-index.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='/js/intern-home.js') }}"></script>
+    {% if title %}
+        <title>Interns - {{ title }}</title>
+    {% else %}
+        <title>Interns</title>
+    {% endif %}
+    <title>Title</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-secondary fixed-top">
+        <a class="navbar-brand" href="#"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" id="homeLink">Home</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="home-body">
+        <div class="home-sidebar">
+            <button class="btn btn-outline-info w-75 m-1" id="postTaskBtn">Post Task</button>
+            <button class="btn btn-outline-info w-75 m-1" id="myTasksBtn">My Tasks</button>
+        </div>
+        <div class="home-content">
+            <div id="operationStatusContainer">
+
+            </div>
+
+
+            <div id="createPostFormContainer" class="d-none">
+                <h1>New Post</h1>
+                <form id="createPostForm">
+                    <div class="form-field-container">
+                        <label class="mt-1">Title</label>
+                        <input type="text" class="form-field" name="title" required/>
+                    </div>
+                    <div class="form-field-container">
+                        <label class="mt-1">Content</label>
+                        <textarea rows="10" cols="40" name="content" placeholder="Content of post" required></textarea>
+                    </div>
+                    <button type="submit" class="form-btn mt-2">Create Post</button>
+                </form>
+            </div>
+
+            <div id="tasksFeedContainer" class="tasks-container">
+
+            </div>
+
+            <div class="d-none" id="spinner">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>

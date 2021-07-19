@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=Bree+Serif&family=Caveat:wght@400;700&family=Lobster&family=Monoton&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display+SC:ital,wght@0,400;0,700;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Source+Sans+Pro:ital,wght@0,400;0,700;1,700&family=Work+Sans:ital,wght@0,400;0,700;1,700&display=swap");
+
+.bg-container {
+    background-color: #f5dedc;
+    min-height:100vh;
+    font-family:"Roboto";
+}
+
+.post-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    font-family:"Roboto";
+}
+
+.post-content {
+    height:30px;
+    overflow:hidden;
+}
+
+.author {
+    color: #6290f5;
+    font-weight: bold;
+}
+
+.time {
+    color:#b3a5a4;
+}
+
+.account-img {
+    height: 100px;
+    width: 100px;
+    border-radius: 50px;
+}
+
+.home-account-img {
+    height: 50px;
+    width: 50px;
+    border-radius: 25px;
+}
+
+.authored-content {
+    white-space: pre-wrap;
+}
