@@ -46,12 +46,17 @@ document.addEventListener('DOMContentLoaded', function() {
     let createPostFormContainerEl = document.getElementById("createPostFormContainer");
     let createPostFormEl = document.getElementById("createPostForm");
 
+    let postTitleEl = document.getElementById("postTitle");
+    let postContentEl = document.getElementById("postContent");
+
     function onPostTask() {
         if (tasksFeedContainerEl.classList.contains("d-none") === false) {
             tasksFeedContainerEl.classList.add("d-none");
         }
 
         statusContainerEl.innerHTML = "";
+        postTitleEl.value = "";
+        postContentEl.innerHTML = "";
         createPostFormContainerEl.classList.remove("d-none");
     }
 
@@ -79,6 +84,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 msg=xhr.responseText;
                 displayOperationSuccess(msg);
+                postTitleEl.value = "";
+                postContentEl.textContent = "";
             } else if (xhr.status == 406) {
                 msg=xhr.responseText;
                 displayOperationFailure(msg);
@@ -89,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // My tasks
+
 
     let myTasksBtnEl = document.getElementById("myTasksBtn");
 
@@ -131,10 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
         taskContainerEl.classList.add("shadow", "task");
         tasksFeedContainerEl.appendChild(taskContainerEl);
 
-        let titleEl = document.createElement("h2");
-        titleEl.textContent = title;
-        taskContainerEl.appendChild(titleEl);
-
         let taskDetailsContainerEl = document.createElement("div");
         taskDetailsContainerEl.classList.add("task-details");
         taskContainerEl.appendChild(taskDetailsContainerEl);
@@ -146,6 +150,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let dateTimeEl = document.createElement("p");
         dateTimeEl.textContent = createdAt;
         taskDetailsContainerEl.appendChild(dateTimeEl);
+
+        let titleEl = document.createElement("h4");
+        titleEl.textContent = title;
+        taskContainerEl.appendChild(titleEl);
 
         let contentEl = document.createElement("p");
         contentEl.textContent = content;
@@ -170,9 +178,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Task feed in home page
 
+
     getTasks();
 
     function getTasks() {
+        spinnerEl.classList.remove("d-none");
         let xhr = new XMLHttpRequest();
         xhr.open("GET", '/all-tasks')
         xhr.onreadystatechange = () => {
@@ -180,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 responseObj = JSON.parse(xhr.response);
                 let {tasksDict, cursor, exists} = responseObj;
                 tasks = Object.values(tasksDict);
-                //console.log(tasks)
+                spinnerEl.classList.add("d-none");
                 displayMyTasks(tasks)
             }
         }

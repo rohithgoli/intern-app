@@ -322,16 +322,16 @@ def create_post():
 def get_tasks(current_user):
     desired_tasks = Task.query().filter(Task.assigned_to == current_user.key).fetch()
     result_dict = dict()
-    for i in range(len(desired_tasks)):
-        task_dict = dict()
-        task = desired_tasks[i]
-        task_dict['title'] = task.title
-        task_dict['content'] = task.content
-        task_dict['createdAt'] = task.created_at.strftime("%d %b %Y %I:%M %p")
-        task_dict['author'] = current_user.username
-        task_dict['taskUid'] = task.uid
-        task_dict['authorUid'] = current_user.uid
-        result_dict[i] = task_dict
+    for each_task in desired_tasks:
+        each_task_dict = dict()
+        each_task_dict['title'] = each_task.title
+        each_task_dict['content'] = each_task.content
+        each_task_dict['createdAt'] = each_task.created_at.strftime("%d %b %Y %I:%M %p")
+        each_task_dict['author'] = current_user.username
+        each_task_dict['taskUid'] = each_task.uid
+        each_task_dict['authorUid'] = current_user.uid
+        dict_key = generate_uid()
+        result_dict[dict_key] = each_task_dict
     return result_dict
 
 
@@ -407,6 +407,16 @@ def get_my_interns():
         abort(401)
 
 
+def create_mentor_dict(mentors_list):
+    mentors_dict = dict()
+    for i in range(len(mentors_list)):
+        mentor_dict = dict()
+        mentor_dict['username'] = mentors_list[i].username
+        mentor_dict['uid'] = mentors_list[i].uid
+        mentors_dict[str(i)] = mentor_dict
+    return mentors_dict
+
+
 @app.route('/intern-data', methods=['POST'])
 @login_required
 def get_intern_data():
@@ -417,8 +427,50 @@ def get_intern_data():
             requested_intern_dict = dict()
             requested_intern_dict['username'] = requested_intern.username
             requested_intern_dict['email'] = requested_intern.email
+            requested_intern_mentors = requested_intern.mentors
+            requested_intern_mentors_list = [Mentor.get_by_id(each_mentor.id()) for each_mentor in requested_intern_mentors]
+            mentors_dict = dict()
+            for i in range(len(requested_intern_mentors_list)):
+                mentor_dict = dict()
+                mentor_dict['username'] = requested_intern_mentors_list[i].username
+                mentor_dict['uid'] = requested_intern_mentors_list[i].uid
+                mentors_dict[str(i)] = mentor_dict
+            requested_intern_dict['mentors'] = mentors_dict
             requested_intern_dict['tasks'] = get_tasks(requested_intern)
             return requested_intern_dict
         else:
             abort(404)
 
+
+@app.route('/mentor-data')
+@login_required
+def get_mentor_data():
+    requested_mentor_uid = request.args.get('mentor_id')
+    with client.context():
+        requested_mentor = Mentor.query().filter(Mentor.uid == requested_mentor_uid).get()
+        if requested_mentor:
+            requested_mentor_dict = dict()
+            requested_mentor_dict['username'] = requested_mentor.username
+            requested_mentor_dict['email'] = requested_mentor.email
+            requested_mentor_interns = requested_mentor.interns
+            requested_mentor_interns_list = [Intern.get_by_id(each_intern.id()) for each_intern in
+                                             requested_mentor_interns]
+            interns_tasks_dict_list = []
+            for each_intern in requested_mentor_interns_list:
+                each_intern_task_dict = get_tasks(each_intern)
+                interns_tasks_dict_list.append(each_intern_task_dict)
+
+            for intern_tasks_dict_count in range(len(interns_tasks_dict_list)-1):
+                tasks_dict = interns_tasks_dict_list[intern_tasks_dict_count] | interns_tasks_dict_list[intern_tasks_dict_count+1]
+
+            interns_dict = dict()
+            for i in range(len(requested_mentor_interns_list)):
+                intern_dict = dict()
+                intern_dict['username'] = requested_mentor_interns_list[i].username
+                intern_dict['uid'] = requested_mentor_interns_list[i].uid
+                interns_dict[str(i)] = intern_dict
+            requested_mentor_dict['interns'] = interns_dict
+            requested_mentor_dict['tasks'] = tasks_dict
+            return requested_mentor_dict
+        else:
+            abort(404)

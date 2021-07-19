@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
     getTasks();
 
     function getTasks() {
+        spinnerEl.classList.remove("d-none");
         const URL = '/all-tasks?cursor='+ cursor;
         let xhr = new XMLHttpRequest();
         xhr.open("GET", URL)
@@ -71,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // console.log(tasks);
                 // console.log(cursor);
                 // console.log(exists);
+                spinnerEl.classList.add("d-none");
                 displayTasks(tasks);
             }
         }
@@ -84,10 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
         taskContainerEl.classList.add("shadow", "task");
         tasksFeedContainerEl.appendChild(taskContainerEl);
 
-        let titleEl = document.createElement("h2");
-        titleEl.textContent = title;
-        taskContainerEl.appendChild(titleEl);
-
         let taskDetailsContainerEl = document.createElement("div");
         taskDetailsContainerEl.classList.add("task-details");
         taskContainerEl.appendChild(taskDetailsContainerEl);
@@ -99,6 +97,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let dateTimeEl = document.createElement("p");
         dateTimeEl.textContent = createdAt;
         taskDetailsContainerEl.appendChild(dateTimeEl);
+
+        let titleEl = document.createElement("h4");
+        titleEl.textContent = title;
+        taskContainerEl.appendChild(titleEl);
 
         let contentEl = document.createElement("p");
         contentEl.textContent = content;
