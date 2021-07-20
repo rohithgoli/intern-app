@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    // get interns under his mentorship and upon clicking intern display intern details and feed by choosen intern
+    // get interns under his mentorship and upon clicking intern, display intern details and feed by choosen intern
 
     getMyInterns();
 
@@ -184,8 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function getDesiredInternData(internId) {
         let url = `/intern-data?intern_id=${internId}`;
         let xhr = new XMLHttpRequest();
-        xhr.open('POST', url);
-        xhr.setRequestHeader("Content-type", 'application/json');
+        xhr.open('GET', url);
+        //xhr.setRequestHeader("Content-type", 'application/json');
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 responseObj = JSON.parse(xhr.response);
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let url = `/mentor-data?mentor_id=${mentorId}`;
         let xhr = new XMLHttpRequest();
         xhr.open('GET', url);
-        xhr.setRequestHeader("Content-type", 'application/json');
+        //xhr.setRequestHeader("Content-type", 'application/json');
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 responseObj = JSON.parse(xhr.response);

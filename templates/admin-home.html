@@ -63,16 +63,16 @@
                 <form id="createInternAccountForm">
                     <div class="form-field-container">
                         <label>Intern Username</label>
-                        <input type="text" class="form-field" name="username" required/>
+                        <input type="text" class="form-field" name="username" id="createInternUsername" required/>
                     </div>
                     <div class="form-field-container">
                         <label>Intern Email</label>
                         <input class="form-field" type="email" pattern="[a-z0-9._%+-]+@+(anywhere.co|gmail.com)"
-                               title="Only @anywhere.co domain is accepted" name="email" required/>
+                               title="Only @anywhere.co domain is accepted" name="email" id="createInternEmail" required/>
                     </div>
                     <div class="form-field-container">
                         <label>Intern Password</label>
-                        <input class="form-field" type="text" name="password" required/>
+                        <input class="form-field" type="text" name="password" id="createInternPassword" required/>
                     </div>
                     <div class="form-field-container">
                         <label>Select Mentor</label>
@@ -91,16 +91,16 @@
                 <form id="createMentorAccountForm">
                     <div class="form-field-container">
                         <label class="mt-1">Mentor Username</label>
-                        <input type="text" class="form-field" name="username" required/>
+                        <input type="text" class="form-field" name="username" id="createMentorUsername" required/>
                     </div>
                     <div class="form-field-container">
                         <label class="mt-1">Mentor Email</label>
                         <input class="form-field" type="email" pattern="[a-z0-9._%+-]+@+(anywhere.co|gmail.com)"
-                               title="Only @anywhere.co domain is accepted" name="email" required/>
+                               title="Only @anywhere.co domain is accepted" name="email" id="createMentorEmail" required/>
                     </div>
                     <div class="form-field-container">
                         <label class="mt-1">Mentor Password</label>
-                        <input class="form-field" type="text" name="password" required/>
+                        <input class="form-field" type="text" name="password" id="createMentorPassword" required/>
                     </div>
                     <button type="submit" class="form-btn mt-2">Submit</button>
                 </form>

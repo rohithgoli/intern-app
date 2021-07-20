@@ -200,6 +200,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         xhr.send(stringifiedData);
+
+        document.getElementById("createMentorUsername").value = "";
+        document.getElementById("createMentorEmail").value = "";
+        document.getElementById("createMentorPassword").value = "";
     });
 
     createMentorAccBtnEl.addEventListener('click', onCreateMentorAcc);
@@ -237,8 +241,8 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.open('GET', '/mentors');
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                resultObject = JSON.parse(xhr.response);
-                existingMentors = Object.values(resultObject);
+                existingMentorsObj = JSON.parse(xhr.response);
+                existingMentors = Object.keys(existingMentorsObj);
             } else if (xhr.status == 406) {
                 msg=xhr.responseText;
                 displayOperationFailure(msg);
@@ -253,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let adminInputForMentorToInternEl = document.getElementById("selectedMentorForIntern");
 
     function doSuggestMentors() {
+
         let inputValue = adminInputForMentorToInternEl.value.toLowerCase();
 
         let suggestionsContainerEl = document.getElementById("mentorSuggestionsContainerForIntern");
@@ -264,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     let suggestionEl = document.createElement("li");
                     suggestionEl.style.listStyleType = "none";
                     suggestionEl.textContent = eachMentor;
-                    suggestionEl.id = eachMentor;
+                    suggestionEl.id = existingMentorsObj[eachMentor];
                     suggestionEl.addEventListener('click', onSuggestionSelectionForCreateInternAcc);
                     suggestionsContainerEl.appendChild(suggestionEl);
                 }
@@ -315,7 +320,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let formObj = {};
 
         for (eachData of data) {
-            formObj[eachData[0]] = eachData[1];
+            if (eachData[0] === "mentor") {
+                formObj[eachData[0]] = existingMentorsObj[eachData[1]];
+            } else {
+                formObj[eachData[0]] = eachData[1];
+            }
         }
 
         let stringifiedData = JSON.stringify(formObj);
@@ -333,6 +342,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         xhr.send(stringifiedData);
+
+        document.getElementById("createInternUsername").value = "";
+        document.getElementById("createInternEmail").value = "";
+        document.getElementById("createInternPassword").value = "";
+        document.getElementById("selectedMentorForIntern").value = "";
     });
 
 
@@ -431,8 +445,12 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 resultObject = JSON.parse(xhr.response);
-                allInterns = Object.values(resultObject.interns);
-                allMentors = Object.values(resultObject.mentors);
+
+                allInternsObject = resultObject.interns;
+                allInterns = Object.keys(allInternsObject);
+
+                allMentorsObject = resultObject.mentors;
+                allMentors = Object.keys(allMentorsObject);
             }
         }
     }
@@ -449,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     let suggestionEl = document.createElement("li");
                     suggestionEl.style.listStyleType = "none";
                     suggestionEl.textContent = eachIntern;
-                    suggestionEl.id = eachIntern;
+                    suggestionEl.id = allInternsObject[eachIntern];
                     suggestionEl.addEventListener('click', onInternSuggestionSelectionForAssignMentor);
                     suggestionsContainerEl.appendChild(suggestionEl);
                 }
@@ -509,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     let suggestionEl = document.createElement("li");
                     suggestionEl.style.listStyleType = "none";
                     suggestionEl.textContent = eachMentor;
-                    suggestionEl.id = eachMentor;
+                    suggestionEl.id = allMentorsObject[eachMentor];
                     suggestionEl.addEventListener('click', onMentorSuggestionSelectionForAssignMentor);
                     suggestionsContainerEl.appendChild(suggestionEl);
                 }
@@ -566,7 +584,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let formObj = {};
         for (eachData of data) {
-            formObj[eachData[0]] = eachData[1];
+            if (eachData[0] == "mentor") {
+                formObj[eachData[0]] = allMentorsObject[eachData[1]];
+            }else {
+                formObj[eachData[0]] = allInternsObject[eachData[1]];
+            }
         }
 
         let stringifiedData = JSON.stringify(formObj);
@@ -586,6 +608,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         xhr.send(stringifiedData);
+
+        document.getElementById("selectedInternForAssignMentor").value = "";
+        document.getElementById("selectedMentorForAssignMentor").value = "";
     });
 
 
@@ -628,8 +653,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                resultObject = JSON.parse(xhr.response);
-                availableInterns = Object.values(resultObject);
+                internsObject = JSON.parse(xhr.response);
+                availableInterns = Object.keys(internsObject);
             }
         }
     }
@@ -646,7 +671,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     let suggestionEl = document.createElement("li");
                     suggestionEl.style.listStyleType = "none";
                     suggestionEl.textContent = eachIntern;
-                    suggestionEl.id = eachIntern;
+                    suggestionEl.id = internsObject[eachIntern];
                     suggestionEl.addEventListener('click', onSuggestionSelection);
                     suggestionsContainerEl.appendChild(suggestionEl);
                 }
@@ -681,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (isSelectionValid === true) {
-            getCurrentMentorsForSelectedIntern(adminInputValue);
+            getCurrentMentorsForSelectedIntern(internsObject[adminInputValue]);
             let selectedMentorForDeletingAssignedMentorEl = document.getElementById("selectedMentorForDeletingAssignedMentor");
             selectedMentorForDeletingAssignedMentorEl.innerHTML = "";
         }
@@ -691,8 +716,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     adminInputForDeletingAssignedMentorEl.addEventListener('change', doNextForDeletingAssignedMentor);
 
-    function getCurrentMentorsForSelectedIntern(selectedIntern) {
-        let data = {"selectedIntern": selectedIntern };
+    function getCurrentMentorsForSelectedIntern(selectedInternUid) {
+        let data = {"selectedInternUid": selectedInternUid };
         let stringifiedData = JSON.stringify(data);
 
         let xhr = new XMLHttpRequest();
@@ -702,8 +727,8 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.onreadystatechange = () => {
 
             if (xhr.readyState == 4 && xhr.status == 200) {
-                resultObject = JSON.parse(xhr.response);
-                assignedMentors = Object.values(resultObject);
+                assignedMentorsObj = JSON.parse(xhr.response);
+                assignedMentors = Object.keys(assignedMentorsObj);
                 displayCurrentAssignedMentors(assignedMentors);
             } else if (xhr.status == 406) {
                 msg=xhr.responseText;
@@ -732,9 +757,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let formObj = {};
         for (eachData of data){
-            formObj[eachData[0]] = eachData[1];
+            if (eachData[0] == "mentor") {
+                formObj[eachData[0]] = assignedMentorsObj[eachData[1]];
+            }else {
+                formObj[eachData[0]] = internsObject[eachData[1]];
+            }
         }
-
         let stringifiedData = JSON.stringify(formObj);
 
         let xhr = new XMLHttpRequest();
@@ -751,7 +779,269 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         xhr.send(stringifiedData);
+
+        document.getElementById("selectedInternForDeletingAssignedMentor").value = "";
+        if (mentorSelectionContainerForDeletingAssignedMentorEl.classList.contains('d-none') == false) {
+            mentorSelectionContainerForDeletingAssignedMentorEl.classList.add("d-none");
+        }
     });
 
+
+
+    // To reset Intern Account Password
+
+
+
+    let changeInternPasswordBtnEl = document.getElementById("changeInternPasswordBtn");
+
+    let changeInternPasswordFormEl = document.getElementById("changeInternPasswordForm");
+
+    let adminInputForChangingInternAccountPasswordEl = document.getElementById("selectedInternForChangingAccountPassword");
+    let internAccountNewPasswordContainerForChangingInternAccountPasswordEl = document.getElementById("internAccountNewPasswordContainer");
+
+    function onChangeInternPassword() {
+
+        statusContainerEl.innerHTML = "";
+
+        if (deleteInternAccountFormContainerEl.classList.contains('d-none') === false) {
+            deleteInternAccountFormContainerEl.classList.add("d-none");
+        }
+
+        if (assignMentorFormContainerEl.classList.contains('d-none') === false) {
+            assignMentorFormContainerEl.classList.add("d-none");
+        }
+
+        if (deleteAssignedMentorFormContainerEl.classList.contains('d-none') === false) {
+            deleteAssignedMentorFormContainerEl.classList.add("d-none");
+        }
+
+        if (changeInternPasswordFormContainerEl.classList.contains('d-none') === true) {
+            changeInternPasswordFormContainerEl.classList.remove("d-none");
+        }
+
+        getExistingInternsData();
+    }
+
+    changeInternPasswordBtnEl.addEventListener('click', onChangeInternPassword);
+
+    function doSuggestInternsForChangeInternAccountPassword() {
+        let inputValue = adminInputForChangingInternAccountPasswordEl.value.toLowerCase();
+        let suggestionsContainerEl = document.getElementById("internSuggestionsContainerForChangingAccountPassword");
+        suggestionsContainerEl.innerHTML = "";
+        if (inputValue !== "") {
+            for (eachIntern of availableInterns) {
+                if (eachIntern.toLowerCase().includes(inputValue)) {
+                    let suggestionEl = document.createElement("li");
+                    suggestionEl.style.listStyleType = "none";
+                    suggestionEl.textContent = eachIntern;
+                    suggestionEl.id = internsObject[eachIntern];
+                    suggestionEl.addEventListener('click', onSuggestionSelectionForChangeInternAccountPassword);
+                    suggestionsContainerEl.appendChild(suggestionEl);
+                }
+            }
+        }
+    }
+
+    function onSuggestionSelectionForChangeInternAccountPassword(event) {
+        adminInputForChangingInternAccountPasswordEl.value = event.target.textContent;
+        let suggestionsContainerEl = document.getElementById("internSuggestionsContainerForChangingAccountPassword");
+        suggestionsContainerEl.innerHTML = "";
+
+        doNextForChangeInternAccountPassword();
+    }
+
+    function doNextForChangeInternAccountPassword() {
+        if (internAccountNewPasswordContainerForChangingInternAccountPasswordEl.classList.contains("d-none") == false) {
+            internAccountNewPasswordContainerForChangingInternAccountPasswordEl.classList.add("d-none");
+        }
+
+        let selectInternForChangingAccountPasswordErrMsgEl = document.getElementById("selectInternForChangingAccountPasswordErrMsg");
+
+        let adminInputValue = adminInputForChangingInternAccountPasswordEl.value;
+        let isSelectionValid;
+        if (adminInputValue !== "" && availableInterns.includes(adminInputValue)) {
+            selectInternForChangingAccountPasswordErrMsgEl.textContent = "";
+            isSelectionValid = true;
+            internAccountNewPasswordContainerForChangingInternAccountPasswordEl.classList.remove("d-none");
+        } else{
+            selectInternForChangingAccountPasswordErrMsgEl.textContent = "Please Input Valid Intern to proceed";
+            selectInternForChangingAccountPasswordErrMsgEl.style.color = "red";
+            isSelectionValid = false;
+        }
+
+        if (isSelectionValid == true) {
+            changeInternPasswordFormEl.addEventListener("submit", function(event){
+                event.preventDefault();
+                new FormData(changeInternPasswordFormEl);
+            });
+        }
+    }
+
+
+    adminInputForChangingInternAccountPasswordEl.addEventListener('keyup', doSuggestInternsForChangeInternAccountPassword);
+
+    adminInputForChangingInternAccountPasswordEl.addEventListener('change', doNextForChangeInternAccountPassword);
+
+    changeInternPasswordFormEl.addEventListener('formdata', function(event){
+        let data = event.formData;
+
+        let formObj = {};
+        for (eachData of data) {
+            if (eachData[0] === "intern") {
+                formObj[eachData[0]] = internsObject[eachData[1]]
+            } else {
+                formObj[eachData[0]] = eachData[1];
+            }
+        }
+
+        let stringifiedData = JSON.stringify(formObj);
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", '/change-intern-password');
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                msg = xhr.responseText;
+                displayOperationSuccess(msg);
+            } else {
+                msg = xhr.responseText;
+                displayOperationFailure(msg);
+            }
+        }
+        xhr.send(stringifiedData);
+
+        document.getElementById("selectedInternForChangingAccountPassword").value = "";
+        if (internAccountNewPasswordContainerForChangingInternAccountPasswordEl.classList.contains("d-none") === false) {
+            internAccountNewPasswordContainerForChangingInternAccountPasswordEl.classList.add("d-none");
+        }
+    });
+
+
+
+    //  To Delete Intern Account
+
+
+
+    let deleteInternAccountChoiceBtnEl = document.getElementById("deleteInternAccountChoiceBtn");
+    let deleteInternAccountFormEl = document.getElementById("deleteInternAccountForm");
+
+    let adminInputForDeletingInternAccountEl = document.getElementById("selectedInternForDeletingInternAccount");
+    let deleteInternAccountSubmitContainerEl = document.getElementById("deleteInternAccountSubmitContainer");
+
+    function onDeleteInternAccount() {
+        statusContainerEl.innerHTML = "";
+
+        let msg = "Deleting Intern Account also deletes all his updates permanently";
+        displayOperationInfo(msg);
+
+        if (assignMentorFormContainerEl.classList.contains('d-none') === false) {
+            assignMentorFormContainerEl.classList.add("d-none");
+        }
+
+        if (deleteAssignedMentorFormContainerEl.classList.contains('d-none') === false) {
+            deleteAssignedMentorFormContainerEl.classList.add("d-none");
+        }
+
+        if (changeInternPasswordFormContainerEl.classList.contains('d-none') === false) {
+            changeInternPasswordFormContainerEl.classList.add("d-none");
+        }
+
+        if (deleteInternAccountFormContainerEl.classList.contains('d-none') === true) {
+            deleteInternAccountFormContainerEl.classList.remove("d-none");
+        }
+
+        getExistingInternsData();
+    }
+
+    deleteInternAccountChoiceBtnEl.addEventListener('click', onDeleteInternAccount);
+
+    function doSuggestInternsForDeleteInternAccount() {
+        let inputValue = adminInputForDeletingInternAccountEl.value.toLowerCase();
+        let suggestionsContainerEl = document.getElementById("internSuggestionsContainerForDeleteInternAccount");
+        suggestionsContainerEl.innerHTML = "";
+        if (inputValue !== "") {
+            for (eachIntern of availableInterns) {
+                if (eachIntern.toLowerCase().includes(inputValue)) {
+                    let suggestionEl = document.createElement("li");
+                    suggestionEl.style.listStyleType = "none";
+                    suggestionEl.textContent = eachIntern;
+                    suggestionEl.id = internsObject[eachIntern];
+                    suggestionEl.addEventListener('click', onSuggestionSelectionForDeleteInternAccount);
+                    suggestionsContainerEl.appendChild(suggestionEl);
+                }
+            }
+        }
+    }
+
+    function onSuggestionSelectionForDeleteInternAccount() {
+        adminInputForDeletingInternAccountEl.value = event.target.textContent;
+        let suggestionsContainerEl = document.getElementById("internSuggestionsContainerForDeleteInternAccount");
+        suggestionsContainerEl.innerHTML = "";
+
+        doNextForDeleteInternAccount();
+    }
+
+    function doNextForDeleteInternAccount() {
+        if (deleteInternAccountSubmitContainerEl.classList.contains("d-none") == false) {
+            deleteInternAccountSubmitContainerEl.classList.add("d-none");
+        }
+
+        let selectInternForDeleteInternAccountErrMsgEl = document.getElementById("selectInternForDeleteInternAccountErrMsg");
+
+        let adminInputValue = adminInputForDeletingInternAccountEl.value;
+        let isSelectionValid;
+        if (adminInputValue !== "" && availableInterns.includes(adminInputValue)) {
+            selectInternForDeleteInternAccountErrMsgEl.textContent = "";
+            isSelectionValid = true;
+            deleteInternAccountSubmitContainerEl.classList.remove("d-none");
+        } else{
+            selectInternForDeleteInternAccountErrMsgEl.textContent = "Please Input Valid Intern to proceed";
+            selectInternForDeleteInternAccountErrMsgEl.style.color = "red";
+            isSelectionValid = false;
+        }
+
+        if (isSelectionValid == true) {
+            deleteInternAccountFormEl.addEventListener("submit", function(event){
+                event.preventDefault();
+                new FormData(deleteInternAccountFormEl);
+            });
+        }
+    }
+
+
+    adminInputForDeletingInternAccountEl.addEventListener('keyup', doSuggestInternsForDeleteInternAccount);
+
+    adminInputForDeletingInternAccountEl.addEventListener('change', doNextForDeleteInternAccount);
+
+
+    deleteInternAccountFormEl.addEventListener("formdata", function(event) {
+        let data = event.formData;
+
+        let formObj = {};
+        for (eachValue of data) {
+            formObj[eachValue[0]] = internsObject[eachValue[1]];
+        }
+
+        let stringifiedData = JSON.stringify(formObj);
+
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/delete-intern-account');
+        xhr.setRequestHeader('Content-type', 'application/json');
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                msg = xhr.responseText;
+                displayOperationSuccess(msg);
+            } else {
+                msg = xhr.responseText;
+                displayOperationFailure(msg);
+            }
+        }
+        xhr.send(stringifiedData);
+
+        document.getElementById("selectedInternForDeletingInternAccount").value = "";
+        if (deleteInternAccountSubmitContainerEl.classList.contains("d-none") === false) {
+            deleteInternAccountSubmitContainerEl.classList.add("d-none");
+        }
+    });
 
 });
