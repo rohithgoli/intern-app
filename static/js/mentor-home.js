@@ -92,6 +92,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let authorEl = document.createElement("p");
         authorEl.textContent = author;
+        authorEl.setAttribute('id', authorUid);
+        authorEl.addEventListener('click', function(event) {
+            let uid = event.target.id;
+            displaySelectedIntern(uid);
+        });
+        authorEl.style.cursor = "pointer";
+        authorEl.addEventListener('mouseover', function(event) {
+            event.target.style.color = "goldenrod";
+        });
+        authorEl.addEventListener('mouseout', function(event) {
+            event.target.style.color = 'black';
+        });
         taskDetailsContainerEl.appendChild(authorEl);
 
         let dateTimeEl = document.createElement("p");

@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display Tasks Feed on logging in
     const cursor = null;
 
+    let detailsContainerEl = document.getElementById('detailsContainer');
     let tasksFeedContainerEl = document.getElementById("tasksFeedContainer");
     let spinnerEl = document.getElementById("spinner");
 
@@ -92,6 +93,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let authorEl = document.createElement("p");
         authorEl.textContent = author;
+        authorEl.setAttribute('id', authorUid);
+        authorEl.addEventListener('click', function(event) {
+            let uid = event.target.id;
+            displaySelectedIntern(uid);
+        });
+        authorEl.style.cursor = "pointer";
+        authorEl.addEventListener('mouseover', function(event) {
+            event.target.style.color = "goldenrod";
+        });
+        authorEl.addEventListener('mouseout', function(event) {
+            event.target.style.color = 'black';
+        });
         taskDetailsContainerEl.appendChild(authorEl);
 
         let dateTimeEl = document.createElement("p");
@@ -120,11 +133,182 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
+    // When user clicks on intern username in feed -- do display intern info and feed by chosen intern
+
+
+    function displaySelectedIntern(internUid) {
+        spinnerEl.classList.remove("d-none");
+
+        detailsContainerEl.innerHTML = "";
+
+        if (statusContainerEl.classList.contains("d-none") === false) {
+            statusContainerEl.classList.add("d-none")
+        }
+
+        tasksFeedContainerEl.innerHTML = "";
+
+        getDesiredInternData(internUid);
+    }
+
+    function getDesiredInternData(internId) {
+        let url = `/intern-data?intern_id=${internId}`;
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        //xhr.setRequestHeader("Content-type", 'application/json');
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                responseObj = JSON.parse(xhr.response);
+                showInternData(responseObj);
+            }
+        }
+        xhr.send();
+    }
+
+
+    function showInternData(internObj) {
+        spinnerEl.classList.add("d-none");
+
+        let {username, email,mentors, tasks} = internObj;
+
+        if (detailsContainerEl.classList.contains("d-none") === true) {
+            detailsContainerEl.classList.remove("d-none");
+        }
+
+        let internInfoContainerEl = document.createElement("div");
+        internInfoContainerEl.classList.add("intern-info-card", "shadow");
+        detailsContainerEl.appendChild(internInfoContainerEl);
+
+        let usernameEl = document.createElement("h4");
+        usernameEl.textContent = username;
+        internInfoContainerEl.appendChild(usernameEl);
+
+        let emailEl = document.createElement("p");
+        emailEl.textContent = email;
+        internInfoContainerEl.appendChild(emailEl);
+
+        mentorship = Object.values(mentors);
+        if (mentorship.length !== 0) {
+
+            let myMentorsHeadingEl = document.createElement("h6");
+            myMentorsHeadingEl.textContent = "My Mentors";
+            internInfoContainerEl.appendChild(myMentorsHeadingEl);
+
+            for (eachMentor of mentorship) {
+                let {username, uid} = eachMentor;
+
+                let mentorEl = document.createElement("a");
+                mentorEl.textContent = username;
+                mentorEl.setAttribute('id',uid);
+                mentorEl.style.cursor = 'pointer';
+                mentorEl.style.color = 'blue';
+                mentorEl.addEventListener('click', function(event) {
+                    let uid = event.target.id;
+                    displaySelectedMentor(uid);
+                });
+                internInfoContainerEl.appendChild(mentorEl);
+            }
+
+        }
+
+        internTasks = Object.values(tasks);
+        displayTasks(internTasks);
+    }
+
+    // When user clicks on mentor username in intern info -- do display mentor info and posts by interns under his mentorship
+
+    function displaySelectedMentor(mentor_uid) {
+        spinnerEl.classList.remove("d-none");
+
+        detailsContainerEl.innerHTML = "";
+
+        if (statusContainerEl.classList.contains("d-none") === false) {
+            statusContainerEl.classList.add("d-none")
+        }
+
+        tasksFeedContainerEl.innerHTML = "";
+
+        getDesiredMentorData(mentorUid=mentor_uid);
+    }
+
+
+    function getDesiredMentorData(mentorId) {
+        let url = `/mentor-data?mentor_id=${mentorId}`;
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        //xhr.setRequestHeader("Content-type", 'application/json');
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                responseObj = JSON.parse(xhr.response);
+                //console.log(responseObj);
+                showMentorData(responseObj);
+            }
+        }
+        xhr.send();
+    }
+
+    function showMentorData(mentorObj) {
+        spinnerEl.classList.add("d-none");
+
+        let {username, email, interns, tasks} = mentorObj;
+
+        if (detailsContainerEl.classList.contains("d-none") === true) {
+            detailsContainerEl.classList.remove("d-none");
+        }
+
+        let mentorInfoContainerEl = document.createElement("div");
+        mentorInfoContainerEl.classList.add("intern-info-card", "shadow");
+        detailsContainerEl.appendChild(mentorInfoContainerEl);
+
+        let usernameEl = document.createElement("h4");
+        usernameEl.textContent = username;
+        mentorInfoContainerEl.appendChild(usernameEl);
+
+        let emailEl = document.createElement("p");
+        emailEl.textContent = email;
+        mentorInfoContainerEl.appendChild(emailEl);
+
+        internship = Object.values(interns);
+        if (internship.length !== 0) {
+
+            let myInternsHeadingEl = document.createElement("h6");
+            myInternsHeadingEl.textContent = "Mentoring";
+            mentorInfoContainerEl.appendChild(myInternsHeadingEl);
+
+            for (eachIntern of internship) {
+                let {username, uid} = eachIntern;
+
+                let internEl = document.createElement("a");
+                internEl.textContent = username;
+                internEl.setAttribute('id',uid);
+                internEl.style.cursor = 'pointer';
+                internEl.style.color = 'blue';
+                internEl.addEventListener('click', function(event) {
+                    let uid = event.target.id;
+                    displaySelectedIntern(uid);
+                });
+                mentorInfoContainerEl.appendChild(internEl);
+            }
+
+        }
+
+        internTasksUnderMentor = Object.values(tasks);
+        displayTasks(internTasksUnderMentor);
+    }
+
+
+
+
+
     // Home link selection
 
     let homeLinkEl = document.getElementById("homeLink");
     homeLinkEl.addEventListener('click', function() {
         statusContainerEl.innerHTML = "";
+
+        if (detailsContainerEl.classList.contains('d-none') === false) {
+            detailsContainerEl.classList.add("d-none");
+        }
+
         if (createInternFormContainerEl.classList.contains('d-none') === false) {
             createInternFormContainerEl.classList.add("d-none");
         }
@@ -154,6 +338,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function onCreateMentorAcc() {
         statusContainerEl.innerHTML = "";
+
+        if (detailsContainerEl.classList.contains('d-none') === false) {
+            detailsContainerEl.classList.add("d-none");
+        }
+
         if (createInternFormContainerEl.classList.contains('d-none') === false) {
             createInternFormContainerEl.classList.add("d-none");
         }
@@ -218,6 +407,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function onCreateInternAcc() {
         statusContainerEl.innerHTML = "";
+
+        if (detailsContainerEl.classList.contains('d-none') === false) {
+            detailsContainerEl.classList.add("d-none");
+        }
+
         if (createMentorFormContainerEl.classList.contains('d-none') === false) {
             createMentorFormContainerEl.classList.add("d-none");
         }
@@ -363,6 +557,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function onUpdateInternAcc() {
         statusContainerEl.innerHTML = "";
+
+        if (detailsContainerEl.classList.contains('d-none') === false) {
+            detailsContainerEl.classList.add("d-none");
+        }
 
         if (createMentorFormContainerEl.classList.contains('d-none') === false) {
             createMentorFormContainerEl.classList.add("d-none");
@@ -1030,6 +1228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 msg = xhr.responseText;
+                console.log(msg);
                 displayOperationSuccess(msg);
             } else {
                 msg = xhr.responseText;

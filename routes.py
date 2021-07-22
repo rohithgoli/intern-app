@@ -336,9 +336,10 @@ def delete_intern_account():
                         mentor.get().interns = updated_interns_list
                         mentor.get().put()
                 ndb.Key(Intern, int(requested_intern.key.id())).delete()
+                print(requested_intern.username)
                 return f'{requested_intern.username} Account deleted successfully'
             else:
-                current_response = flask.Response(status=406, response=f"{requested_intern.username} Account does not exist", content_type="application/json")
+                current_response = flask.Response(status=406, response=f"Account does not exist", content_type="application/json")
                 return current_response
     else:
         logout_user()
