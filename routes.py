@@ -336,10 +336,36 @@ def delete_intern_account():
                         mentor.get().interns = updated_interns_list
                         mentor.get().put()
                 ndb.Key(Intern, int(requested_intern.key.id())).delete()
-                print(requested_intern.username)
                 return f'{requested_intern.username} Account deleted successfully'
             else:
                 current_response = flask.Response(status=406, response=f"Account does not exist", content_type="application/json")
+                return current_response
+    else:
+        logout_user()
+        abort(401)
+
+
+# For Admin
+# To delete mentor account
+@app.route('/delete-mentor-account', methods=['POST'])
+@login_required
+def delete_mentor_account():
+    if current_user.get_user_type() == 'Admin':
+        admin_data = request.get_json()
+        requested_mentor_uid = admin_data.get('mentor')
+        with client.context():
+            requested_mentor = Mentor.query().filter(Mentor.uid == requested_mentor_uid).get()
+            print(requested_mentor)
+            if requested_mentor != None:
+                if len(requested_mentor.interns) == 0:
+                    ndb.Key(Mentor, int(requested_mentor.key.id())).delete()
+                    return f'{requested_mentor.username} Account deleted successfully'
+                else:
+                    current_response = flask.Response(status=406, response=f"Request cannot be completed, Mentor assigned with interns",
+                                                  content_type="application/json")
+                    return current_response
+            else:
+                current_response = flask.Response(status=404, response=f"Account does not exist", content_type="application/json")
                 return current_response
     else:
         logout_user()

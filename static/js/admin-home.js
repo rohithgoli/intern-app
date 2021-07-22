@@ -321,6 +321,10 @@ document.addEventListener('DOMContentLoaded', function() {
             updateInternAccContainerEl.classList.add("d-none");
         }
 
+        if (deleteMentorAccountFormContainerEl.classList.contains('d-none') === false) {
+            deleteMentorAccountFormContainerEl.classList.add("d-none");
+        }
+
         if (tasksFeedContainerEl.classList.contains('d-none') === true) {
             tasksFeedContainerEl.classList.remove("d-none");
         }
@@ -353,6 +357,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (updateInternAccContainerEl.classList.contains('d-none') === false) {
             updateInternAccContainerEl.classList.add("d-none");
+        }
+
+        if (deleteMentorAccountFormContainerEl.classList.contains('d-none') === false) {
+            deleteMentorAccountFormContainerEl.classList.add("d-none");
         }
 
         statusContainerEl.innerHTML = "";
@@ -422,6 +430,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (updateInternAccContainerEl.classList.contains('d-none') === false) {
             updateInternAccContainerEl.classList.add("d-none");
+        }
+
+        if (deleteMentorAccountFormContainerEl.classList.contains('d-none') === false) {
+            deleteMentorAccountFormContainerEl.classList.add("d-none");
         }
 
         statusContainerEl.innerHTML = "";
@@ -572,6 +584,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (createInternFormContainerEl.classList.contains('d-none') === false) {
             createInternFormContainerEl.classList.add("d-none");
+        }
+
+        if (deleteMentorAccountFormContainerEl.classList.contains('d-none') === false) {
+            deleteMentorAccountFormContainerEl.classList.add("d-none");
         }
 
         if (assignMentorFormContainerEl.classList.contains('d-none') === false) {
@@ -1242,5 +1258,146 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteInternAccountSubmitContainerEl.classList.add("d-none");
         }
     });
+
+
+
+    // Delete Mentor Account
+
+
+    let deleteMentorAccBtnEl = document.getElementById("deleteMentorAccBtn");
+    let deleteMentorAccountFormContainerEl = document.getElementById("deleteMentorAccountFormContainer");
+    let deleteMentorAccountFormEl = document.getElementById("deleteMentorAccountForm");
+
+    let adminInputForDeletingMentorAccountEl = document.getElementById("selectedMentorForDeletingMentorAccount");
+    let deleteMentorAccountSubmitContainerEl = document.getElementById("deleteMentorAccountSubmitContainer");
+
+    function onDeleteMentorAccount() {
+        statusContainerEl.innerHTML = "";
+
+        let msg = "Please Make Sure that Mentor does not have any assigned Interns";
+        displayOperationInfo(msg);
+
+        if (detailsContainerEl.classList.contains('d-none') === false) {
+            detailsContainerEl.classList.add("d-none");
+        }
+
+        if (createMentorFormContainerEl.classList.contains('d-none') === false) {
+            createMentorFormContainerEl.classList.add("d-none");
+        }
+
+        if (createInternFormContainerEl.classList.contains('d-none') === false) {
+            createInternFormContainerEl.classList.add("d-none");
+        }
+
+        if (tasksFeedContainerEl.classList.contains('d-none') === false) {
+            tasksFeedContainerEl.classList.add("d-none");
+        }
+
+        if (updateInternAccContainerEl.classList.contains('d-none') === false) {
+            updateInternAccContainerEl.classList.add("d-none");
+        }
+
+        if (deleteMentorAccountFormContainerEl.classList.contains('d-none') === true) {
+            deleteMentorAccountFormContainerEl.classList.remove("d-none");
+        }
+
+        getExistingMentors();
+    }
+
+    deleteMentorAccBtnEl.addEventListener('click', onDeleteMentorAccount);
+
+    function doSuggestMentorsForDeleteMentorAccount() {
+        let inputValue = adminInputForDeletingMentorAccountEl.value.toLowerCase();
+        let suggestionsContainerEl = document.getElementById("mentorSuggestionsContainerForDeleteMentorAccount");
+        suggestionsContainerEl.innerHTML = "";
+        if (inputValue !== "") {
+            for (eachMentor of existingMentors) {
+                if (eachMentor.toLowerCase().includes(inputValue)) {
+                    let suggestionEl = document.createElement("li");
+                    suggestionEl.style.listStyleType = "none";
+                    suggestionEl.textContent = eachMentor;
+                    suggestionEl.id = existingMentorsObj[eachMentor];
+                    suggestionEl.addEventListener('click', onSuggestionSelectionForDeleteMentorAccount);
+                    suggestionsContainerEl.appendChild(suggestionEl);
+                }
+            }
+        }
+    }
+
+    function onSuggestionSelectionForDeleteMentorAccount() {
+        adminInputForDeletingMentorAccountEl.value = event.target.textContent;
+        let suggestionsContainerEl = document.getElementById("mentorSuggestionsContainerForDeleteMentorAccount");
+        suggestionsContainerEl.innerHTML = "";
+
+        doNextForDeleteMentorAccount();
+    }
+
+    function doNextForDeleteMentorAccount() {
+        if (deleteMentorAccountSubmitContainerEl.classList.contains("d-none") == false) {
+            deleteMentorAccountSubmitContainerEl.classList.add("d-none");
+        }
+
+        let selectMentorForDeleteMentorAccountErrMsgEl = document.getElementById("selectMentorForDeleteMentorAccountErrMsg");
+
+        let adminInputValue = adminInputForDeletingMentorAccountEl.value;
+        let isSelectionValid;
+        if (adminInputValue !== "" && existingMentors.includes(adminInputValue)) {
+            selectMentorForDeleteMentorAccountErrMsgEl.textContent = "";
+            isSelectionValid = true;
+            deleteMentorAccountSubmitContainerEl.classList.remove("d-none");
+        } else{
+            selectMentorForDeleteMentorAccountErrMsgEl.textContent = "Please Input Valid Mentor to proceed";
+            selectMentorForDeleteMentorAccountErrMsgEl.style.color = "red";
+            isSelectionValid = false;
+        }
+
+        if (isSelectionValid == true) {
+            deleteMentorAccountFormEl.addEventListener("submit", function(event){
+                event.preventDefault();
+                new FormData(deleteMentorAccountFormEl);
+            });
+        }
+    }
+
+
+    adminInputForDeletingMentorAccountEl.addEventListener('keyup', doSuggestMentorsForDeleteMentorAccount);
+
+    adminInputForDeletingMentorAccountEl.addEventListener('change', doNextForDeleteMentorAccount);
+
+
+    deleteMentorAccountFormEl.addEventListener("formdata", function(event) {
+        let data = event.formData;
+
+        let formObj = {};
+        for (eachValue of data) {
+            formObj[eachValue[0]] = existingMentorsObj[eachValue[1]];
+        }
+
+        let stringifiedData = JSON.stringify(formObj);
+        console.log(stringifiedData);
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/delete-mentor-account');
+        xhr.setRequestHeader('Content-type', 'application/json');
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                msg = xhr.responseText;
+                console.log(msg);
+                displayOperationSuccess(msg);
+            } else {
+                msg = xhr.responseText;
+                displayOperationFailure(msg);
+            }
+        }
+        xhr.send(stringifiedData);
+
+        document.getElementById("selectedMentorForDeletingMentorAccount").value = "";
+        if (deleteMentorAccountSubmitContainerEl.classList.contains("d-none") === false) {
+            deleteMentorAccountSubmitContainerEl.classList.add("d-none");
+        }
+    });
+
+
+
+
 
 });
