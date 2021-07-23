@@ -1,29 +1,18 @@
 import flask
-import uuid
-from flask import render_template, url_for, flash, redirect, request, abort, make_response
-from internapp import app, ndb, bcrypt
-from internapp.forms import LoginForm, PostForm
+from flask import render_template, url_for, flash, redirect, request, abort, Blueprint
+from internapp import bcrypt
+from internapp.admin.forms import LoginForm
 from internapp.models import Admin, Intern, Mentor, Task
 from flask_login import login_user, current_user, logout_user, login_required
 from google.cloud import ndb
+from internapp.admin.utils import generate_uid, get_tasks
 
 client = ndb.Client()
 
-
-# Functions
-
-# for generating uuid
-def generate_uid():
-    new_uid = str(uuid.uuid4())
-    return new_uid
+admin = Blueprint('admin', __name__)
 
 
-
-
-
-
-
-@app.route('/', methods=['GET', 'POST'])
+@admin.route('/', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
@@ -34,7 +23,7 @@ def login():
             if mentor and bcrypt.check_password_hash(mentor.password, login_form.password.data):
                 login_user(mentor, remember=login_form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('mentor_home'))
+                return redirect(next_page) if next_page else redirect(url_for('mentor.mentor_home'))
             else:
                 flash(f" :( Login failed! Please check details you entered", 'danger')
         elif category == 'Admin':
@@ -43,7 +32,7 @@ def login():
             if admin and (admin.password == login_form.password.data):
                 login_user(admin, remember=login_form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('admin_home'))
+                return redirect(next_page) if next_page else redirect(url_for('admin.admin_home'))
             else:
                 flash(f" :( Login failed! Please check details you entered", 'danger')
         else:
@@ -52,14 +41,14 @@ def login():
             if intern and bcrypt.check_password_hash(intern.password, login_form.password.data):
                 login_user(intern, remember=login_form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('intern_home'))
+                return redirect(next_page) if next_page else redirect(url_for('intern.intern_home'))
             else:
                 flash(f" :(  Login failed! Please check details you entered", 'danger')
     return render_template('login.html', form=login_form)
 
 
 # For Admin - Home page
-@app.route('/home-admin', methods=['GET', 'POST'])
+@admin.route('/home-admin', methods=['GET', 'POST'])
 @login_required
 def admin_home():
     if current_user.get_user_type() == 'Admin':
@@ -69,36 +58,14 @@ def admin_home():
         abort(401)
 
 
-# For Intern - Home page
-@app.route('/home-intern', methods=['GET', 'POST'])
-@login_required
-def intern_home():
-    if current_user.get_user_type() == 'Intern':
-        return render_template('intern-home.html', title="Intern-Home")
-    else:
-        logout_user()
-        abort(401)
-
-
-# For Mentor - Home page
-@app.route('/home-mentor', methods=['GET', 'POST'])
-@login_required
-def mentor_home():
-    if current_user.get_user_type() == 'Mentor':
-        return render_template('mentor-home.html', title="Mentor-Home")
-    else:
-        logout_user()
-        abort(401)
-
-
-@app.route('/logout')
+@admin.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('admin.login'))
 
 
 # For Admin - Create Mentor Account
-@app.route('/create-mentor', methods=['POST'])
+@admin.route('/create-mentor', methods=['POST'])
 @login_required
 def create_mentor_account():
     if current_user.get_user_type() == 'Admin':
@@ -128,7 +95,7 @@ def create_mentor_account():
 
 
 # for getting current existing mentors
-@app.route('/mentors')
+@admin.route('/mentors')
 @login_required
 def get_current_mentors():
     if current_user.get_user_type() == 'Admin':
@@ -145,7 +112,7 @@ def get_current_mentors():
 
 
 # For Admin create intern
-@app.route('/create-intern', methods=['POST'])
+@admin.route('/create-intern', methods=['POST'])
 @login_required
 def create_intern_account():
     if current_user.get_user_type() == 'Admin':
@@ -180,7 +147,7 @@ def create_intern_account():
 
 
 # for getting current existing Interns and Mentors
-@app.route('/interns-mentors', methods=['GET'])
+@admin.route('/interns-mentors', methods=['GET'])
 @login_required
 def get_interns_and_mentors():
     with client.context():
@@ -197,7 +164,7 @@ def get_interns_and_mentors():
     return result_dict
 
 
-@app.route('/interns', methods=['GET'])
+@admin.route('/interns', methods=['GET'])
 @login_required
 def get_interns():
     with client.context():
@@ -208,7 +175,7 @@ def get_interns():
     return interns_dict
 
 
-@app.route('/mentors-for-intern', methods=['POST'])
+@admin.route('/mentors-for-intern', methods=['POST'])
 @login_required
 def get_mentors_for_intern():
     admin_data = request.get_json()
@@ -232,7 +199,7 @@ def get_mentors_for_intern():
 
 # For Admin
 # Assign Mentor to Intern and update intern and mentor accounts
-@app.route('/assign-mentor', methods=['POST'])
+@admin.route('/assign-mentor', methods=['POST'])
 @login_required
 def assign_mentor():
     if current_user.get_user_type() == 'Admin':
@@ -265,7 +232,7 @@ def assign_mentor():
 
 # For Admin
 # Delete existing Mentor to Intern and update intern and mentor accounts
-@app.route('/delete-assigned-mentor', methods=['POST'])
+@admin.route('/delete-assigned-mentor', methods=['POST'])
 @login_required
 def delete_assigned_mentor():
     if current_user.get_user_type() == 'Admin':
@@ -296,7 +263,7 @@ def delete_assigned_mentor():
 
 # For Admin
 # To change intern account password
-@app.route('/change-intern-password', methods=['POST'])
+@admin.route('/change-intern-password', methods=['POST'])
 @login_required
 def change_intern_password():
     if current_user.get_user_type() == 'Admin':
@@ -316,7 +283,7 @@ def change_intern_password():
 
 # For Admin
 # To delete intern account
-@app.route('/delete-intern-account', methods=['POST'])
+@admin.route('/delete-intern-account', methods=['POST'])
 @login_required
 def delete_intern_account():
     if current_user.get_user_type() == 'Admin':
@@ -347,7 +314,7 @@ def delete_intern_account():
 
 # For Admin
 # To delete mentor account
-@app.route('/delete-mentor-account', methods=['POST'])
+@admin.route('/delete-mentor-account', methods=['POST'])
 @login_required
 def delete_mentor_account():
     if current_user.get_user_type() == 'Admin':
@@ -372,51 +339,7 @@ def delete_mentor_account():
         abort(401)
 
 
-@app.route('/create-post', methods=['POST'])
-@login_required
-def create_post():
-    if current_user.get_user_type() == 'Intern':
-        data = request.get_json()
-        if request.method == 'POST':
-            title = data.get('title')
-            content = data.get('content')
-            with client.context():
-                task = Task(uid=generate_uid(), title=title, content=content, assigned_to=current_user.key)
-                task.put()
-                return "Your task posted successfully"
-    else:
-        abort(401)
-
-
-def get_tasks(current_user):
-    desired_tasks = Task.query().filter(Task.assigned_to == current_user.key).fetch()
-    result_dict = dict()
-    for each_task in desired_tasks:
-        each_task_dict = dict()
-        each_task_dict['title'] = each_task.title
-        each_task_dict['content'] = each_task.content
-        each_task_dict['createdAt'] = each_task.created_at.strftime("%d %b %Y %I:%M %p")
-        each_task_dict['author'] = current_user.username
-        each_task_dict['taskUid'] = each_task.uid
-        each_task_dict['authorUid'] = current_user.uid
-        dict_key = generate_uid()
-        result_dict[dict_key] = each_task_dict
-    return result_dict
-
-
-# For Intern to display his tasks
-@app.route('/my-tasks')
-@login_required
-def get_my_tasks():
-    if current_user.get_user_type() == "Intern":
-        with client.context():
-            result_dict = get_tasks(current_user)
-            return result_dict
-    else:
-        abort(401)
-
-
-@app.route('/all-tasks')
+@admin.route('/all-tasks')
 @login_required
 def get_all_tasks():
     cursor = request.args.get('cursor')
@@ -444,50 +367,8 @@ def get_all_tasks():
         response_dict = {"tasksDict": result_dict, "cursor": cursor, "exists": exists}
         return response_dict
 
-"""
-@app.route('/cursor-tasks')
-@login_required
-def get_tasks():
-"""
 
-
-@app.route('/my-interns')
-@login_required
-def get_my_interns():
-    if current_user.get_user_type() == 'Mentor':
-        with client.context():
-            requested_interns = current_user.interns
-            response_dict = dict()
-            if requested_interns:
-                response_dict['internsAssigned'] = True
-                interns_list = [Intern.get_by_id(each_intern.id()) for each_intern in requested_interns]
-                my_interns = dict()
-                for i in range(len(interns_list)):
-                    intern_dict = dict()
-                    intern_dict['username'] = interns_list[i].username
-                    intern_dict['uid'] = interns_list[i].uid
-                    intern_dict['email'] = interns_list[i].email
-                    my_interns[str(i)] = intern_dict
-                response_dict['myInterns'] = my_interns
-            else:
-                response_dict['internsAssigned'] = False
-            return response_dict
-    else:
-        logout_user()
-        abort(401)
-
-
-def create_mentor_dict(mentors_list):
-    mentors_dict = dict()
-    for i in range(len(mentors_list)):
-        mentor_dict = dict()
-        mentor_dict['username'] = mentors_list[i].username
-        mentor_dict['uid'] = mentors_list[i].uid
-        mentors_dict[str(i)] = mentor_dict
-    return mentors_dict
-
-
-@app.route('/intern-data', methods=['GET'])
+@admin.route('/intern-data', methods=['GET'])
 @login_required
 def get_intern_data():
     requested_intern_uid = request.args.get('intern_id')
@@ -512,7 +393,7 @@ def get_intern_data():
             abort(404)
 
 
-@app.route('/mentor-data')
+@admin.route('/mentor-data')
 @login_required
 def get_mentor_data():
     requested_mentor_uid = request.args.get('mentor_id')
@@ -531,8 +412,12 @@ def get_mentor_data():
                 interns_tasks_dict_list.append(each_intern_task_dict)
 
             tasks_dict = dict()
-            for intern_tasks_dict_count in range(len(interns_tasks_dict_list)-1):
-                tasks_dict = interns_tasks_dict_list[intern_tasks_dict_count] | interns_tasks_dict_list[intern_tasks_dict_count+1]
+            if len(interns_tasks_dict_list) > 1:
+                for intern_tasks_dict_count in range(len(interns_tasks_dict_list)-1):
+
+                    tasks_dict = interns_tasks_dict_list[intern_tasks_dict_count] | interns_tasks_dict_list[intern_tasks_dict_count+1]
+            else:
+                tasks_dict = interns_tasks_dict_list[0]
 
             interns_dict = dict()
             for i in range(len(requested_mentor_interns_list)):
@@ -542,6 +427,7 @@ def get_mentor_data():
                 interns_dict[str(i)] = intern_dict
             requested_mentor_dict['interns'] = interns_dict
             requested_mentor_dict['tasks'] = tasks_dict
+
             return requested_mentor_dict
         else:
             abort(404)

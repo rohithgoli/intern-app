@@ -27,8 +27,10 @@
                 <a class="nav-item nav-link" id="homeLink">Home</a>
             </div>
             <div class="navbar-nav ml-auto">
+                <!--
                 <a class="nav-item nav-link">Register</a>
-                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+                -->
+                <a class="nav-item nav-link" href="{{ url_for('admin.logout') }}">Logout</a>
             </div>
         </div>
     </nav>
@@ -39,7 +41,9 @@
             <button class="btn btn-outline-info w-75 m-1" id="createMentorAccBtn">Create Mentor Account</button>
             <button class="btn btn-outline-secondary w-75 m-1" id="updateInternAccBtn">Update Intern Account</button>
             <button class="btn btn-outline-secondary w-75 m-1" id="deleteMentorAccBtn">Delete Mentor Account</button>
+            <!--
             <button class="btn btn-outline-secondary w-75 m-1" id="displayMapBtn">View Mapping</button>
+            -->
         </div>
         <div class="home-content" id="homeContent">
             <div id="operationStatusContainer">
