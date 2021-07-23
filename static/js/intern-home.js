@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let spinnerEl = document.getElementById("spinner");
 
     let statusContainerEl = document.getElementById("operationStatusContainer");
+    let noFeedMsgContainerEl = document.getElementById("noMoreFeedMsgContainer");
 
     function displayOperationSuccess(message){
 
@@ -59,6 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         statusContainerEl.innerHTML = "";
+        noFeedMsgContainerEl.innerHTML = "";
+
         postTitleEl.value = "";
         postContentEl.innerHTML = "";
         createPostFormContainerEl.classList.remove("d-none");
@@ -441,6 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         tasksFeedContainerEl.innerHTML = "";
+        noFeedMsgContainerEl.innerHTML = "";
         getTasks();
     });
 })

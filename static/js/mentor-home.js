@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     let statusContainerEl = document.getElementById("operationStatusContainer");
+    let noMoreFeedMsgContainerEl = document.getElementById("noMoreFeedMsgContainer");
 
     function displayOperationSuccess(message){
 
@@ -51,14 +52,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display Tasks Feed on logging in
 
-    const cursor = null;
+    var cursor = '';
+    var loadingFeed = false;
+    var exists = true;
+
 
     let tasksFeedContainerEl = document.getElementById("tasksFeedContainer");
     let spinnerEl = document.getElementById("spinner");
 
     getTasks();
 
+    let homeContentEl = document.getElementById("homeContent");
+
+    homeContentEl.addEventListener('scroll', function(){
+        let sh = homeContentEl.scrollHeight;
+        let st = homeContentEl.scrollTop;
+        let ch = homeContentEl.clientHeight;
+
+        let scrolledHeight = st+ch;
+        if (scrolledHeight === sh && exists && !loadingFeed) {
+            spinnerEl.classList.remove("d-none");
+            getTasks();
+        }
+
+    });
+
     function getTasks() {
+        if (loadingFeed) return;
+
+        loadingFeed = true;
+
         spinnerEl.classList.remove("d-none");
         const URL = '/all-tasks?cursor='+ cursor;
         let xhr = new XMLHttpRequest();
@@ -67,7 +90,124 @@ document.addEventListener('DOMContentLoaded', function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 responseObj = JSON.parse(xhr.response);
                 // console.log(responseObj);
-                let {tasksDict, cursor, exists} = responseObj;
+                let tasksDict = responseObj.tasksDict;
+                cursor = responseObj.cursor;
+                exists = responseObj.exists;
+                tasks = Object.values(tasksDict);
+                // console.log(tasks);
+                // console.log(cursor);
+                // console.log(exists);
+                spinnerEl.classList.add("d-none");
+                displayTasks(tasks);
+            }
+        }
+        xhr.send();
+    }
+
+    function createAndAppendTask(eachTask) {
+        let  {title, content, createdAt, author, authorUid, taskUid } = eachTask;
+
+        let taskContainerEl = document.createElement("div");
+        taskContainerEl.classList.add("shadow", "task");
+        tasksFeedContainerEl.appendChild(taskContainerEl);
+
+        let taskDetailsContainerEl = document.createElement("div");
+        taskDetailsContainerEl.classList.add("task-details");
+        taskContainerEl.appendChild(taskDetailsContainerEl);
+
+        let authorEl = document.createElement("p");
+        authorEl.textContent = author;
+        authorEl.setAttribute('id', authorUid);
+        authorEl.addEventListener('click', function(event) {
+            let uid = event.target.id;
+            displaySelectedIntern(uid);
+        });
+        authorEl.style.cursor = "pointer";
+        authorEl.addEventListener('mouseover', function(event) {
+            event.target.style.color = "goldenrod";
+        });
+        authorEl.addEventListener('mouseout', function(event) {
+            event.target.style.color = 'black';
+        });
+        taskDetailsContainerEl.appendChild(authorEl);
+
+        let dateTimeEl = document.createElement("p");
+        dateTimeEl.textContent = createdAt;
+        taskDetailsContainerEl.appendChild(dateTimeEl);
+
+        let titleEl = document.createElement("h4");
+        titleEl.textContent = title;
+        taskContainerEl.appendChild(titleEl);
+
+        let contentEl = document.createElement("p");
+        contentEl.textContent = content;
+        taskContainerEl.appendChild(contentEl);
+    }
+
+    function displayTasks(tasks) {
+        if (tasks.length === 0) {
+            let noTaskEl = document.createElement("h3");
+            noTaskEl.textContent = "Currently No Feed available to display";
+            tasksFeedContainerEl.appendChild(noTaskEl);
+        }else {
+            for (eachTask of tasks) {
+                createAndAppendTask(eachTask);
+            }
+        }
+
+        if (!exists) {
+            let noFeedMsgEl = document.createElement("p");
+            noFeedMsgEl.textContent = "No more feed available to display";
+            noFeedMsgEl.style.color = "red";
+            noFeedMsgEl.style.textAlign = "center";
+            noMoreFeedMsgContainerEl.appendChild(noFeedMsgEl);
+        }
+
+        loadingFeed = false;
+    }
+
+/*
+    var cursor = '';
+    var loadingFeed = false;
+    var exists = true;
+
+    let tasksFeedContainerEl = document.getElementById("tasksFeedContainer");
+    let spinnerEl = document.getElementById("spinner");
+
+    getTasks();
+
+    let homeContentEl = document.getElementById("homeContent");
+
+    homeContentEl.addEventListener('scroll', function(){
+        let sh = homeContentEl.scrollHeight;
+        let st = homeContentEl.scrollTop;
+        let ch = homeContentEl.clientHeight;
+
+        let scrolledHeight = st+ch;
+        if (scrolledHeight === sh && exists && !loadingFeed) {
+            spinnerEl.classList.remove("d-none");
+            getTasks();
+        }
+
+    });
+
+
+    function getTasks() {
+        if (loadingFeed) return;
+
+        loadingFeed = true;
+
+        spinnerEl.classList.remove("d-none");
+        const URL = '/all-tasks?cursor='+ cursor;
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", URL)
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                responseObj = JSON.parse(xhr.response);
+                // console.log(responseObj);
+                let tasksDict = responseObj;
+                cursor = responseObj.cursor;
+                exists = responseObj.exists;
                 tasks = Object.values(tasksDict);
                 // console.log(tasks);
                 // console.log(cursor);
@@ -130,8 +270,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 createAndAppendTask(eachTask);
             }
         }
-    }
 
+        loadingFeed = false;
+    }
+*/
 
     // get interns under his mentorship and upon clicking intern, display intern details and feed by choosen intern
 
@@ -183,6 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
         spinnerEl.classList.remove("d-none");
 
         detailsContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
 
         if (statusContainerEl.classList.contains("d-none") === false) {
             statusContainerEl.classList.add("d-none")
@@ -264,6 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         spinnerEl.classList.remove("d-none");
 
         detailsContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
 
         if (statusContainerEl.classList.contains("d-none") === false) {
             statusContainerEl.classList.add("d-none")
@@ -283,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 responseObj = JSON.parse(xhr.response);
-                console.log(responseObj);
+                //console.log(responseObj);
                 showMentorData(responseObj);
             }
         }
@@ -346,6 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
     homeLinkEl.addEventListener('click', function() {
 
         statusContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
 
         if (detailsContainerEl.classList.contains('d-none') === false) {
             detailsContainerEl.classList.add("d-none");
@@ -356,6 +501,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         tasksFeedContainerEl.innerHTML = "";
+        cursor = '';
+        exists = true;
         getTasks();
 
     });

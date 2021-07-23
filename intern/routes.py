@@ -95,6 +95,7 @@ def get_my_tasks():
 @login_required
 def get_all_tasks():
     cursor = request.args.get('cursor')
+
     with client.context():
         page_size = 5
         if cursor:

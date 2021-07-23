@@ -69,11 +69,13 @@ def logout():
 @login_required
 def get_all_tasks():
     cursor = request.args.get('cursor')
+    cursor = ndb.Cursor(urlsafe=cursor)
     with client.context():
         page_size = 5
         if cursor:
+            desired_tasks, cursor, more = Task.query().order(-Task.created_at).fetch_page(page_size, start_cursor=cursor)
+        else:
             desired_tasks, cursor, more = Task.query().order(-Task.created_at).fetch_page(page_size)
-        desired_tasks, cursor, more = Task.query().order(-Task.created_at).fetch_page(page_size)
 
         cursor = cursor.urlsafe().decode("utf-8")
         exists = more

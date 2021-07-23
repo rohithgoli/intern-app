@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let statusContainerEl = document.getElementById("operationStatusContainer");
 
+    let noMoreFeedMsgContainerEl = document.getElementById("noMoreFeedMsgContainer");
+
     function displayOperationSuccess(message){
 
         statusContainerEl.innerHTML = "";
@@ -27,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayOperationFailure(message) {
 
-
         statusContainerEl.innerHTML = "";
 
         let msgContainerEl = document.createElement("div");
@@ -51,7 +52,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // Display Tasks Feed on logging in
-    const cursor = null;
+
+    var cursor = '';
+    var loadingFeed = false;
+    var exists = true;
 
     let detailsContainerEl = document.getElementById('detailsContainer');
     let tasksFeedContainerEl = document.getElementById("tasksFeedContainer");
@@ -59,7 +63,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     getTasks();
 
+
+    let homeContentEl = document.getElementById("homeContent");
+
+    homeContentEl.addEventListener('scroll', function(){
+        let sh = homeContentEl.scrollHeight;
+        let st = homeContentEl.scrollTop;
+        let ch = homeContentEl.clientHeight;
+
+        let scrolledHeight = st+ch;
+        if (scrolledHeight === sh && exists && !loadingFeed) {
+            spinnerEl.classList.remove("d-none");
+            getTasks();
+        }
+
+    });
+
+
+
     function getTasks() {
+        if (loadingFeed) return;
+
+        loadingFeed = true;
+
         spinnerEl.classList.remove("d-none");
         const URL = '/all-tasks?cursor='+ cursor;
         let xhr = new XMLHttpRequest();
@@ -68,7 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 responseObj = JSON.parse(xhr.response);
                 // console.log(responseObj);
-                let {tasksDict, cursor, exists} = responseObj;
+                let tasksDict = responseObj.tasksDict;
+                cursor = responseObj.cursor;
+                exists = responseObj.exists;
                 tasks = Object.values(tasksDict);
                 // console.log(tasks);
                 // console.log(cursor);
@@ -130,6 +158,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 createAndAppendTask(eachTask);
             }
         }
+
+        if (!exists) {
+            let noFeedMsgEl = document.createElement("p");
+            noFeedMsgEl.textContent = "No more feed available to display";
+            noFeedMsgEl.style.color = "red";
+            noFeedMsgEl.style.textAlign = "center";
+            noMoreFeedMsgContainerEl.appendChild(noFeedMsgEl);
+        }
+
+        loadingFeed = false;
     }
 
 
@@ -140,12 +178,10 @@ document.addEventListener('DOMContentLoaded', function() {
         spinnerEl.classList.remove("d-none");
 
         detailsContainerEl.innerHTML = "";
-
-        if (statusContainerEl.classList.contains("d-none") === false) {
-            statusContainerEl.classList.add("d-none")
-        }
+        statusContainerEl.innerHTML = "";
 
         tasksFeedContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
 
         getDesiredInternData(internUid);
     }
@@ -220,12 +256,10 @@ document.addEventListener('DOMContentLoaded', function() {
         spinnerEl.classList.remove("d-none");
 
         detailsContainerEl.innerHTML = "";
-
-        if (statusContainerEl.classList.contains("d-none") === false) {
-            statusContainerEl.classList.add("d-none")
-        }
+        statusContainerEl.innerHTML = "";
 
         tasksFeedContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
 
         getDesiredMentorData(mentorUid=mentor_uid);
     }
@@ -329,6 +363,9 @@ document.addEventListener('DOMContentLoaded', function() {
             tasksFeedContainerEl.classList.remove("d-none");
         }
         tasksFeedContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
+        cursor = '';
+        exists = true;
         getTasks();
     });
 
@@ -364,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         statusContainerEl.innerHTML = "";
-
+        noMoreFeedMsgContainerEl.innerHTML = "";
         createMentorFormContainerEl.classList.remove("d-none");
     }
 
@@ -437,6 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         statusContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
         createInternFormContainerEl.classList.remove("d-none");
 
         getExistingMentors();
@@ -569,6 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function onUpdateInternAcc() {
         statusContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
 
         if (detailsContainerEl.classList.contains('d-none') === false) {
             detailsContainerEl.classList.add("d-none");
@@ -1273,6 +1312,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function onDeleteMentorAccount() {
         statusContainerEl.innerHTML = "";
+        noMoreFeedMsgContainerEl.innerHTML = "";
 
         let msg = "Please Make Sure that Mentor does not have any assigned Interns";
         displayOperationInfo(msg);
@@ -1374,14 +1414,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let stringifiedData = JSON.stringify(formObj);
-        console.log(stringifiedData);
+        //console.log(stringifiedData);
         let xhr = new XMLHttpRequest();
         xhr.open('POST', '/delete-mentor-account');
         xhr.setRequestHeader('Content-type', 'application/json');
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 msg = xhr.responseText;
-                console.log(msg);
                 displayOperationSuccess(msg);
             } else {
                 msg = xhr.responseText;
@@ -1395,9 +1434,5 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteMentorAccountSubmitContainerEl.classList.add("d-none");
         }
     });
-
-
-
-
 
 });

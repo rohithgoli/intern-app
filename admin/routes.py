@@ -322,7 +322,7 @@ def delete_mentor_account():
         requested_mentor_uid = admin_data.get('mentor')
         with client.context():
             requested_mentor = Mentor.query().filter(Mentor.uid == requested_mentor_uid).get()
-            print(requested_mentor)
+
             if requested_mentor != None:
                 if len(requested_mentor.interns) == 0:
                     ndb.Key(Mentor, int(requested_mentor.key.id())).delete()
@@ -342,12 +342,15 @@ def delete_mentor_account():
 @admin.route('/all-tasks')
 @login_required
 def get_all_tasks():
-    cursor = request.args.get('cursor')
+    new_cursor = request.args.get('cursor')
+    new_cursor = ndb.Cursor(urlsafe=new_cursor)
     with client.context():
         page_size = 5
-        if cursor:
+        if new_cursor:
+            desired_tasks, cursor, more = Task.query().order(-Task.created_at).fetch_page(page_size,
+                                                                                          start_cursor=new_cursor)
+        else:
             desired_tasks, cursor, more = Task.query().order(-Task.created_at).fetch_page(page_size)
-        desired_tasks, cursor, more = Task.query().order(-Task.created_at).fetch_page(page_size)
 
         cursor = cursor.urlsafe().decode("utf-8")
         exists = more
