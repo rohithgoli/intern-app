@@ -7,8 +7,8 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/admin-index.css') }}">
-    <script type="text/javascript" src="{{ url_for('static', filename='/js/intern-home.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin-index.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/intern-home.js') }}"></script>
     {% if title %}
         <title>Interns - {{ title }}</title>
     {% else %}
@@ -37,7 +37,7 @@
             <button class="btn btn-outline-info w-75 m-1" id="postTaskBtn">Post Task</button>
             <button class="btn btn-outline-info w-75 m-1" id="myTasksBtn">My Tasks</button>
         </div>
-        <div class="home-content">
+        <div class="home-content" id="homeContent">
             <div id="operationStatusContainer">
 
             </div>

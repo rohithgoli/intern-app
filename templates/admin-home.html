@@ -7,8 +7,8 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/admin-index.css') }}">
-    <script type="text/javascript" src="{{ url_for('static', filename='/js/admin-home.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin-index.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/admin-home.js') }}"></script>
     {% if title %}
         <title>Interns - {{ title }}</title>
     {% else %}
@@ -129,7 +129,7 @@
 
                 <div  class="d-none" id="assignMentorFormContainer">
                     <form id="assignMentorForm">
-                        <h3 class="mt-3">Your are Assigning Intern to Mentor</h3>
+                        <h3 class="mt-3">You are Assigning Intern to Mentor</h3>
                         <div class="form-field-container mt-3">
                             <label>Select Intern</label>
                             <input class="form-field" id="selectedInternForAssignMentor" name="intern" required>
@@ -152,7 +152,7 @@
 
                 <div  class="d-none" id="deleteAssignedMentorFormContainer">
                     <form id="deleteAssignedMentorForm">
-                        <h3 class="mt-3">Your are Deleting Assigned Mentor to Intern</h3>
+                        <h3 class="mt-3">You are Deleting Assigned Mentor to Intern</h3>
                         <div class="form-field-container mt-3">
                             <label>Select Intern</label>
                             <input class="form-field" id="selectedInternForDeletingAssignedMentor" name="intern" required>
